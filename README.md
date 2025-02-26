@@ -1,8 +1,6 @@
-# Pdf::Master
+# pdf-master
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pdf/master`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+`pdf-master` is a Ruby gem that enables adding signatures and stamps to PDFs using Prawn and CombinePDF.
 
 ## Installation
 
@@ -12,17 +10,75 @@ Add this line to your application's Gemfile:
 gem 'pdf-master'
 ```
 
-And then execute:
+Then, install the gem using:
 
-    $ bundle
+```sh
+bundle install
+```
 
-Or install it yourself as:
+Or install it manually:
 
-    $ gem install pdf-master
+```sh
+gem install pdf-master
+```
+
+## Dependencies
+
+Ensure the following dependencies are installed in your project:
+
+- `prawn` for PDF generation
+- `combine_pdf` for PDF manipulation
+
+Add them to your Gemfile if not already included:
+
+```ruby
+gem 'prawn'
+gem 'combine_pdf'
+```
+
+Run:
+
+```sh
+bundle install
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+### Adding a Signature to a PDF
+
+```ruby
+require 'pdf/master'
+
+pdf_path = 'path/to/original.pdf'
+signature_image_path = 'path/to/signature.png'
+x = 100
+y = 200
+
+output_pdf = Pdf::Master::Signature.add_signature(pdf_path, signature_image_path, x, y)
+puts "Signature added: #{output_pdf}"
+```
+
+### Adding a Stamp to a PDF
+
+```ruby
+require 'pdf/master'
+
+pdf_path = 'path/to/original.pdf'
+stamp_text = 'Approved'
+x = 150
+y = 250
+
+output_pdf = Pdf::Master::Stamp.add_stamp(pdf_path, stamp_text, x, y)
+puts "Stamp added: #{output_pdf}"
+```
+
+## Testing
+
+Run RSpec tests to ensure everything works correctly:
+
+```sh
+bundle exec rspec
+```
 
 ## Development
 
@@ -32,7 +88,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pdf-master. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/gyandip-chauhan/pdf-master. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -40,4 +96,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Pdf::Master project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/pdf-master/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Pdf::Master project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/gyandip-chauhan/pdf-master/blob/master/CODE_OF_CONDUCT.md).

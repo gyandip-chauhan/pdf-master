@@ -1,23 +1,42 @@
 require "spec_helper"
+require "fileutils"
+require "prawn"
 
 RSpec.describe Pdf::Master do
-  let(:pdf_path) { "spec/test_files/invoice_1.pdf" }
+  let(:pdf_path) { "spec/test_files/sample.pdf" }
   let(:signature_path) { "spec/test_files/signature.png" }
-  let(:output_signature) { "spec/test_files/signed_invoice_1.pdf" }
-  let(:output_stamp) { "spec/test_files/stamped_invoice_1.pdf" }
+  let(:output_dir) { "spec/test_files/output" }
 
-  before do
-    FileUtils.cp(pdf_path, output_signature) if File.exist?(pdf_path)
-    FileUtils.cp(pdf_path, output_stamp) if File.exist?(pdf_path)
+  before(:each) do
+    FileUtils.mkdir_p(output_dir)
+    FileUtils.mkdir_p("public/uploads")
+
+    # Generate a sample PDF for testing before each test
+    Prawn::Document.generate(pdf_path) do |pdf|
+      pdf.text "This is a test PDF"
+    end
   end
 
-  it "adds a signature to the PDF" do
-    expect { Pdf::Master::Signature.add_signature(output_signature, signature_path, 100, 100) }.not_to raise_error
-    expect(File.exist?(output_signature)).to be true
+  after(:each) do
+    FileUtils.rm_rf(Dir["#{output_dir}/*"])
+    FileUtils.rm_rf(Dir["public/uploads/*"])
   end
 
-  it "adds a stamp to the PDF" do
-    expect { Pdf::Master::Stamp.add_stamp(output_stamp, "CONFIDENTIAL", 150, 200) }.not_to raise_error
-    expect(File.exist?(output_stamp)).to be true
+  describe Pdf::Master::Signature do
+    it "adds a signature to the PDF" do
+      result_path = Pdf::Master::Signature.add_signature(pdf_path, signature_path, 50, 100)
+
+      expect(File.exist?(result_path)).to be true
+      expect(File.size(result_path)).to be > File.size(pdf_path)
+    end
+  end
+
+  describe Pdf::Master::Stamp do
+    it "adds a stamp to the PDF" do
+      result_path = Pdf::Master::Stamp.add_stamp(pdf_path, "APPROVED", 150, 200)
+
+      expect(File.exist?(result_path)).to be true
+      expect(File.size(result_path)).to be > File.size(pdf_path)
+    end
   end
 end
