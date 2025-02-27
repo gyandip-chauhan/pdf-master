@@ -1,42 +1,83 @@
 require "spec_helper"
 require "fileutils"
+require "combine_pdf"
 require "prawn"
 
-RSpec.describe Pdf::Master do
-  let(:pdf_path) { "spec/test_files/sample.pdf" }
-  let(:signature_path) { "spec/test_files/signature.png" }
-  let(:output_dir) { "spec/test_files/output" }
+RSpec.describe Pdf::Master::Signature, type: :service do
+  let(:pdf_path) { "spec/fixtures/sample.pdf" }
+  let(:signature_image_path) { "spec/fixtures/signature.png" }
+  let(:output_dir) { "public/uploads" }
 
-  before(:each) do
+  before do
     FileUtils.mkdir_p(output_dir)
-    FileUtils.mkdir_p("public/uploads")
+    Prawn::Document.generate(pdf_path) { |pdf| pdf.text "Test PDF" }
 
-    # Generate a sample PDF for testing before each test
-    Prawn::Document.generate(pdf_path) do |pdf|
-      pdf.text "This is a test PDF"
+    unless File.exist?(signature_image_path)
+      FileUtils.cp("spec/support/signature.png", signature_image_path)
     end
   end
 
-  after(:each) do
-    FileUtils.rm_rf(Dir["#{output_dir}/*"])
-    FileUtils.rm_rf(Dir["public/uploads/*"])
-  end
+  after { cleanup_files }
 
-  describe Pdf::Master::Signature do
-    it "adds a signature to the PDF" do
-      result_path = Pdf::Master::Signature.add_signature(pdf_path, signature_path, 50, 100)
+  describe ".add_signature" do
+    it "adds a signature to the specified PDF page" do
+      output_path = described_class.add_signature(pdf_path, signature_image_path, 100, 100, 1)
 
-      expect(File.exist?(result_path)).to be true
-      expect(File.size(result_path)).to be > File.size(pdf_path)
+      expect_output_pdf(output_path)
+    end
+
+    it "handles predefined positions correctly" do
+      output_path = described_class.add_signature(pdf_path, signature_image_path, nil, nil, 1, "top_right")
+
+      expect_output_pdf(output_path)
+    end
+
+    it "returns nil for an invalid page number" do
+      expect(described_class.add_signature(pdf_path, signature_image_path, 100, 100, 5)).to be_nil
     end
   end
+end
 
-  describe Pdf::Master::Stamp do
-    it "adds a stamp to the PDF" do
-      result_path = Pdf::Master::Stamp.add_stamp(pdf_path, "APPROVED", 150, 200)
+RSpec.describe Pdf::Master::Stamp, type: :service do
+  let(:pdf_path) { "spec/fixtures/sample.pdf" }
+  let(:output_dir) { "public/uploads" }
+  let(:stamp_text) { "CONFIDENTIAL" }
 
-      expect(File.exist?(result_path)).to be true
-      expect(File.size(result_path)).to be > File.size(pdf_path)
+  before do
+    FileUtils.mkdir_p(output_dir)
+    Prawn::Document.generate(pdf_path) { |pdf| pdf.text "Test PDF" }
+  end
+
+  after { cleanup_files }
+
+  describe ".add_stamp" do
+    it "adds a stamp text to the specified PDF page" do
+      output_path = described_class.add_stamp(pdf_path, stamp_text, 100, 100, 1)
+
+      expect_output_pdf(output_path)
+    end
+
+    it "handles predefined positions correctly" do
+      output_path = described_class.add_stamp(pdf_path, stamp_text, nil, nil, 1, "center")
+
+      expect_output_pdf(output_path)
+    end
+
+    it "returns nil for an invalid page number" do
+      expect(described_class.add_stamp(pdf_path, stamp_text, 100, 100, 5)).to be_nil
     end
   end
+end
+
+def cleanup_files
+  FileUtils.rm_f(Dir.glob("public/uploads/*"))
+  FileUtils.rm_f("spec/fixtures/sample.pdf")
+end
+
+def expect_output_pdf(output_path)
+  expect(output_path).to be_a(String)
+  expect(File).to exist(output_path)
+
+  pdf = CombinePDF.load(output_path)
+  expect(pdf.pages.count).to eq(1)
 end

@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Gyandipsinh Chauhan"]
   spec.email         = ["gyandip3395@gmail.com"]
 
-  spec.summary       = "A Ruby gem for embedding signatures and stamps into PDFs using Prawn and MiniMagick."
-  spec.description   = "PdfMaster simplifies the process of adding electronic signatures and stamps to PDFs in Ruby on Rails applications. It leverages Prawn for PDF manipulation and MiniMagick for handling signature images. Ideal for applications requiring document signing, approvals, or annotations."
+  spec.summary       = "A Ruby gem for embedding signatures and stamps into PDFs using Prawn and CombinePDF."
+  spec.description   = "PdfMaster simplifies the process of adding electronic signatures and stamps to PDFs in Ruby on Rails applications. It leverages Prawn for PDF generation and CombinePDF for PDF manipulation, ensuring seamless integration for applications requiring document signing, approvals, or annotations."
   spec.homepage      = "https://github.com/gyandip-chauhan/pdf-master"
   spec.license       = "MIT"
 
